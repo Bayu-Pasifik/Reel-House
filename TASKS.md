@@ -7,6 +7,7 @@
 - [x] Halaman detail film dengan URL yang dapat dibagikan.
 - [x] Trailer, credits, rekomendasi, galeri, ulasan, koleksi, provider Indonesia, sertifikasi rilis, dan link IMDb.
 - [x] Build produksi dan pengabaian `.env` di Git.
+- [x] Redesain visual katalog streaming berdasarkan referensi IDLIX, tanpa menyalin merek atau asetnya.
 
 ## Next
 

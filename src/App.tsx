@@ -734,12 +734,6 @@ export default function App() {
       >
         <div className="hero-shade" />
         <div className="hero-content">
-          <p className="eyebrow">
-            A considered film index <em>•</em>{" "}
-            {featured
-              ? `now showing ${year(featured.release_date)}`
-              : "loading cinema"}
-          </p>
           <h1>{featured?.title || "The stories worth your attention."}</h1>
           <p className="hero-description">
             {featured?.overview ||
