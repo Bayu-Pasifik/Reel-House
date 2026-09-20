@@ -3,6 +3,13 @@ export type Movie = {
   release_date: string; vote_average: number; genre_ids: number[]; original_language: string
 }
 
+export type MovieDetails = Movie & {
+  runtime: number | null
+  genres: { id: number; name: string }[]
+  tagline: string
+  status: string
+}
+
 type ListResponse = { results: Movie[] }
 const baseUrl = 'https://api.themoviedb.org/3'
 const apiKey = import.meta.env.VITE_TMDB_API_KEY
@@ -18,5 +25,6 @@ async function request<T>(path: string, params: Record<string, string> = {}): Pr
 export const getTrending = () => request<ListResponse>('/trending/movie/week')
 export const getPopular = () => request<ListResponse>('/movie/popular')
 export const getUpcoming = () => request<ListResponse>('/movie/upcoming')
+export const getMovieDetails = (id: number) => request<MovieDetails>(`/movie/${id}`)
 export const searchMovies = (query: string) => request<ListResponse>('/search/movie', { query, include_adult: 'false' })
 export const image = (path: string | null, size = 'w780') => path ? `https://image.tmdb.org/t/p/${size}${path}` : ''
