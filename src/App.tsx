@@ -159,11 +159,15 @@ function DetailPage({
   onBack,
   onSelect,
   onTrailer,
+  isFavorite,
+  onToggleFavorite,
 }: {
   movieId: number;
   onBack: () => void;
   onSelect: (movie: Movie) => void;
   onTrailer: (movie: Movie) => void;
+  isFavorite: boolean;
+  onToggleFavorite: (movie: Movie) => void;
 }) {
   const [providerRegion, setProviderRegion] = useState("ID");
   const details = useQuery({
@@ -270,6 +274,9 @@ function DetailPage({
                     IMDb
                   </a>
                 )}
+                <button className="watch-trailer" onClick={() => onToggleFavorite(details.data)}>
+                  {isFavorite ? "Remove favorite" : "Save favorite"}
+                </button>
                 <button
                   className="watch-trailer"
                   onClick={() => onTrailer(details.data)}
@@ -486,6 +493,9 @@ export default function App() {
     () => Number(location.hash.match(/^#movie\/(\d+)$/)?.[1]) || null,
   );
   const [trailerMovie, setTrailerMovie] = useState<Movie | null>(null);
+  const [favorites, setFavorites] = useState<Movie[]>(() => {
+    try { return JSON.parse(localStorage.getItem("reelhouse:favorites") || "[]") as Movie[]; } catch { return []; }
+  });
   const [browseSource, setBrowseSource] = useState<BrowseSource | null>(null);
   const trending = useQuery({
     queryKey: ["movies", "trending"],
@@ -598,6 +608,8 @@ export default function App() {
     return () => removeEventListener("hashchange", syncRoute);
   }, []);
 
+  useEffect(() => { localStorage.setItem("reelhouse:favorites", JSON.stringify(favorites)); }, [favorites]);
+
   function onSearch(event: FormEvent) {
     event.preventDefault();
     setSubmitted(query.trim());
@@ -607,6 +619,9 @@ export default function App() {
   }
   function closeMovie() {
     location.hash = "top";
+  }
+  function toggleFavorite(movie: Movie) {
+    setFavorites((current) => current.some((item) => item.id === movie.id) ? current.filter((item) => item.id !== movie.id) : [movie, ...current]);
   }
   const isLoading =
     trending.isLoading ||
@@ -623,6 +638,8 @@ export default function App() {
           onBack={closeMovie}
           onSelect={openMovie}
           onTrailer={setTrailerMovie}
+          isFavorite={favorites.some((movie) => movie.id === selectedMovieId)}
+          onToggleFavorite={toggleFavorite}
         />
         {trailerMovie && (
           <div
@@ -814,6 +831,7 @@ export default function App() {
               onSelect={openMovie}
             />
           ))}
+        {favorites.length > 0 && <Rail index="Saved" title="Your shortlist" movies={favorites} onSelect={openMovie} />}
         {isLoading ? (
           <p className="status">Curating the latest releases…</p>
         ) : (

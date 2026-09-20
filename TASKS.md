@@ -13,7 +13,7 @@
 - [x] Tambahkan state error dan empty state yang spesifik untuk setiap bagian detail yang datanya tidak tersedia.
 - [x] Tambahkan halaman/flow "View all" untuk setiap rail, termasuk pagination.
 - [x] Tambahkan pemilihan wilayah provider tontonan; Indonesia tetap menjadi default.
-- [ ] Tambahkan penyimpanan favorit lokal agar pengguna dapat membandingkan film sebelum menonton.
+- [x] Tambahkan penyimpanan favorit lokal agar pengguna dapat membandingkan film sebelum menonton.
 - [ ] Tambahkan kontrol aksesibilitas: fokus saat membuka trailer, tombol Escape untuk menutupnya, dan label yang ditinjau ulang.
 - [ ] Uji alur beranda, detail, pencarian, dan hash route dengan data TMDB yang dimock.
 
