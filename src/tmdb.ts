@@ -41,6 +41,7 @@ async function request<T>(path: string, params: Record<string, string> = {}): Pr
 export const getTrending = () => request<ListResponse>('/trending/movie/week')
 export const getPopular = () => request<ListResponse>('/movie/popular')
 export const getUpcoming = () => request<ListResponse>('/movie/upcoming')
+export const getTopRated = () => request<ListResponse>('/movie/top_rated')
 export const discoverByGenre = (genreId: number) => request<ListResponse>('/discover/movie', { with_genres: String(genreId), sort_by: 'popularity.desc', 'vote_count.gte': '50' })
 export const getMovieDetails = (id: number) => request<MovieDetails>(`/movie/${id}`)
 export const getRecommendations = (id: number) => request<ListResponse>(`/movie/${id}/recommendations`)
