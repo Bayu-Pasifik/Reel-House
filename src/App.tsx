@@ -25,15 +25,15 @@ function Rail({ title, index, movies, onSelect }: { title: string; index: string
   </section>
 }
 
-function DetailPage({ movie, onBack, onSelect, onTrailer }: { movie: Movie; onBack: () => void; onSelect: (movie: Movie) => void; onTrailer: (movie: Movie) => void }) {
-  const details = useQuery({ queryKey: ['movie', movie.id], queryFn: () => getMovieDetails(movie.id) })
-  const recommendations = useQuery({ queryKey: ['movie', movie.id, 'recommendations'], queryFn: () => getRecommendations(movie.id) })
-  const credits = useQuery({ queryKey: ['movie', movie.id, 'credits'], queryFn: () => getMovieCredits(movie.id) })
+function DetailPage({ movieId, onBack, onSelect, onTrailer }: { movieId: number; onBack: () => void; onSelect: (movie: Movie) => void; onTrailer: (movie: Movie) => void }) {
+  const details = useQuery({ queryKey: ['movie', movieId], queryFn: () => getMovieDetails(movieId) })
+  const recommendations = useQuery({ queryKey: ['movie', movieId, 'recommendations'], queryFn: () => getRecommendations(movieId) })
+  const credits = useQuery({ queryKey: ['movie', movieId, 'credits'], queryFn: () => getMovieCredits(movieId) })
   const director = credits.data?.crew.find(member => member.job === 'Director')
 
   return <main className="detail-page">
     <nav className="detail-nav"><button onClick={onBack}>Back to discovery</button><a className="wordmark" href="#top" onClick={onBack}>REEL<span>HOUSE</span></a></nav>
-    {details.isLoading ? <p className="detail-status status">Opening the film file…</p> : details.data ? <><section className="detail-hero" style={details.data.backdrop_path ? { backgroundImage: `url(${image(details.data.backdrop_path, 'original')})` } : undefined}><div className="detail-hero-shade" /><div className="detail-hero-copy"><p>{details.data.genres.map(genre => genre.name).join(' / ') || 'Feature film'} · {year(details.data.release_date)}</p><h1>{details.data.title}</h1>{details.data.tagline && <blockquote>{details.data.tagline}</blockquote>}<div className="detail-facts"><span>{details.data.vote_average.toFixed(1)} rating</span>{details.data.runtime && <span>{details.data.runtime} min</span>}<span>{details.data.status}</span><button className="watch-trailer" onClick={() => onTrailer(movie)}>Watch trailer <i>▶</i></button></div></div></section><section className="detail-content"><div className="detail-summary"><h2>About the film</h2><p>{details.data.overview || 'No synopsis is available for this title.'}</p></div>{credits.data?.cast.length ? <section className="credits" aria-label="Cast and crew"><h2>{director ? `Directed by ${director.name}` : 'Featuring'}</h2><div className="cast-track">{credits.data.cast.slice(0, 6).map(person => <article className="cast-member" key={person.id}>{person.profile_path ? <img src={image(person.profile_path, 'w185')} alt="" loading="lazy" /> : <div className="cast-placeholder" />}<p>{person.name}</p><span>{person.character}</span></article>)}</div></section> : null}{recommendations.data?.results.length ? <section className="recommendations" aria-label="Recommended films"><h2>More to discover</h2><div className="recommendation-track">{recommendations.data.results.slice(0, 6).map(item => <Poster key={item.id} movie={item} onSelect={onSelect} />)}</div></section> : null}</section></> : <p className="detail-status status">Film details are unavailable. Return to discovery and try another title.</p>}
+    {details.isLoading ? <p className="detail-status status">Opening the film file…</p> : details.data ? <><section className="detail-hero" style={details.data.backdrop_path ? { backgroundImage: `url(${image(details.data.backdrop_path, 'original')})` } : undefined}><div className="detail-hero-shade" /><div className="detail-hero-copy"><p>{details.data.genres.map(genre => genre.name).join(' / ') || 'Feature film'} · {year(details.data.release_date)}</p><h1>{details.data.title}</h1>{details.data.tagline && <blockquote>{details.data.tagline}</blockquote>}<div className="detail-facts"><span>{details.data.vote_average.toFixed(1)} rating</span>{details.data.runtime && <span>{details.data.runtime} min</span>}<span>{details.data.status}</span><button className="watch-trailer" onClick={() => onTrailer(details.data)}>Watch trailer <i>▶</i></button></div></div></section><section className="detail-content"><div className="detail-summary"><h2>About the film</h2><p>{details.data.overview || 'No synopsis is available for this title.'}</p></div>{credits.data?.cast.length ? <section className="credits" aria-label="Cast and crew"><h2>{director ? `Directed by ${director.name}` : 'Featuring'}</h2><div className="cast-track">{credits.data.cast.slice(0, 6).map(person => <article className="cast-member" key={person.id}>{person.profile_path ? <img src={image(person.profile_path, 'w185')} alt="" loading="lazy" /> : <div className="cast-placeholder" />}<p>{person.name}</p><span>{person.character}</span></article>)}</div></section> : null}{recommendations.data?.results.length ? <section className="recommendations" aria-label="Recommended films"><h2>More to discover</h2><div className="recommendation-track">{recommendations.data.results.slice(0, 6).map(item => <Poster key={item.id} movie={item} onSelect={onSelect} />)}</div></section> : null}</section></> : <p className="detail-status status">Film details are unavailable. Return to discovery and try another title.</p>}
   </main>
 }
 
@@ -41,7 +41,7 @@ export default function App() {
   const root = useRef<HTMLElement>(null)
   const [query, setQuery] = useState('')
   const [submitted, setSubmitted] = useState('')
-  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
+  const [selectedMovieId, setSelectedMovieId] = useState<number | null>(() => Number(location.hash.match(/^#movie\/(\d+)$/)?.[1]) || null)
   const [trailerMovie, setTrailerMovie] = useState<Movie | null>(null)
   const trending = useQuery({ queryKey: ['movies', 'trending'], queryFn: getTrending })
   const popular = useQuery({ queryKey: ['movies', 'popular'], queryFn: getPopular })
@@ -62,10 +62,18 @@ export default function App() {
     return () => mm.revert()
   }, [trending.isSuccess, popular.isSuccess, upcoming.isSuccess, submitted])
 
+  useEffect(() => {
+    const syncRoute = () => setSelectedMovieId(Number(location.hash.match(/^#movie\/(\d+)$/)?.[1]) || null)
+    addEventListener('hashchange', syncRoute)
+    return () => removeEventListener('hashchange', syncRoute)
+  }, [])
+
   function onSearch(event: FormEvent) { event.preventDefault(); setSubmitted(query.trim()) }
+  function openMovie(movie: Movie) { location.hash = `movie/${movie.id}` }
+  function closeMovie() { location.hash = 'top' }
   const isLoading = trending.isLoading || popular.isLoading || upcoming.isLoading
 
-  if (selectedMovie) return <><DetailPage movie={selectedMovie} onBack={() => setSelectedMovie(null)} onSelect={setSelectedMovie} onTrailer={setTrailerMovie} />
+  if (selectedMovieId) return <><DetailPage movieId={selectedMovieId} onBack={closeMovie} onSelect={openMovie} onTrailer={setTrailerMovie} />
     {trailerMovie && <div className="detail-backdrop" role="presentation" onClick={() => setTrailerMovie(null)}><section className="trailer-modal" role="dialog" aria-modal="true" aria-labelledby="trailer-title" onClick={event => event.stopPropagation()}><button className="modal-close" onClick={() => setTrailerMovie(null)} aria-label="Close trailer">×</button><h2 id="trailer-title">{trailerMovie.title} trailer</h2>{videos.isLoading ? <p className="status">Loading trailer…</p> : trailer ? <iframe src={`https://www.youtube-nocookie.com/embed/${trailer.key}?autoplay=1`} title={trailer.name} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen /> : <p className="status">No official YouTube trailer is available for this film.</p>}</section></div>}</>
 
   return <main ref={root}>
@@ -83,8 +91,8 @@ export default function App() {
     <section id="discover" className="content">
       <div className="intro"><p className="eyebrow">The current edit</p><h2>Cinema for the curious<br /><i>and the restless.</i></h2><p>Browse what is moving culture forward. Data is supplied live by TMDB, intelligently cached to keep the experience calm and quick.</p></div>
       <form className="search-shell" onSubmit={onSearch}><div className="search-core"><label htmlFor="movie-search">Find a film</label><input id="movie-search" value={query} onChange={e => setQuery(e.target.value)} placeholder="Title, director, or a feeling…" /><button type="submit">Search <span>↗</span></button></div></form>
-      {submitted && <section className="search-results"><div className="rail-heading"><span>00</span><h2>Results for “{submitted}”</h2><button onClick={() => { setQuery(''); setSubmitted('') }}>Clear <i>×</i></button></div>{results.isLoading ? <p className="status">Looking through the archive…</p> : <div className="result-grid">{results.data?.results.slice(0, 8).map(movie => <Poster key={movie.id} movie={movie} onSelect={setSelectedMovie} />) || <p className="status">No matching titles yet.</p>}</div>}</section>}
-      {isLoading ? <p className="status">Curating the latest releases…</p> : <><Rail index="01" title="In the conversation" movies={trending.data?.results} onSelect={setSelectedMovie} /><Rail index="02" title="The essential popular" movies={popular.data?.results} onSelect={setSelectedMovie} /><Rail index="03" title="Coming into focus" movies={upcoming.data?.results} onSelect={setSelectedMovie} /></>}
+      {submitted && <section className="search-results"><div className="rail-heading"><span>00</span><h2>Results for “{submitted}”</h2><button onClick={() => { setQuery(''); setSubmitted('') }}>Clear <i>×</i></button></div>{results.isLoading ? <p className="status">Looking through the archive…</p> : <div className="result-grid">{results.data?.results.slice(0, 8).map(movie => <Poster key={movie.id} movie={movie} onSelect={openMovie} />) || <p className="status">No matching titles yet.</p>}</div>}</section>}
+      {isLoading ? <p className="status">Curating the latest releases…</p> : <><Rail index="01" title="In the conversation" movies={trending.data?.results} onSelect={openMovie} /><Rail index="02" title="The essential popular" movies={popular.data?.results} onSelect={openMovie} /><Rail index="03" title="Coming into focus" movies={upcoming.data?.results} onSelect={openMovie} /></>}
     </section>
     <footer id="about"><a className="wordmark" href="#top">REEL<span>HOUSE</span></a><p>A living index for the cinema obsessed.</p><small>Data & imagery: TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.</small></footer>
     {trailerMovie && <div className="detail-backdrop" role="presentation" onClick={() => setTrailerMovie(null)}><section className="trailer-modal" role="dialog" aria-modal="true" aria-labelledby="trailer-title" onClick={event => event.stopPropagation()}><button className="modal-close" onClick={() => setTrailerMovie(null)} aria-label="Close trailer">×</button><h2 id="trailer-title">{trailerMovie.title} trailer</h2>{videos.isLoading ? <p className="status">Loading trailer…</p> : trailer ? <iframe src={`https://www.youtube-nocookie.com/embed/${trailer.key}?autoplay=1`} title={trailer.name} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen /> : <p className="status">No official YouTube trailer is available for this film.</p>}</section></div>}
