@@ -570,6 +570,19 @@ button {
     10px "DM Mono",
     monospace;
 }
+.detail-facts .external-link {
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  color: #e2ded4;
+  font:
+    10px "DM Mono",
+    monospace;
+}
+.detail-facts .external-link:hover {
+  border-color: #c5a467;
+  color: #d6b66e;
+}
 .recommendations {
   margin-top: 48px;
   padding-top: 28px;

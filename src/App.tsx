@@ -4,6 +4,7 @@ import { gsap } from "gsap";
 import {
   discoverByGenre,
   getCollection,
+  getExternalIds,
   getLatest,
   getMovieCredits,
   getMovieDetails,
@@ -157,6 +158,10 @@ function DetailPage({
     queryKey: ["movie", movieId, "release-dates"],
     queryFn: () => getReleaseDates(movieId),
   });
+  const externalIds = useQuery({
+    queryKey: ["movie", movieId, "external-ids"],
+    queryFn: () => getExternalIds(movieId),
+  });
   const director = credits.data?.crew.find(
     (member) => member.job === "Director",
   );
@@ -213,6 +218,16 @@ function DetailPage({
                   <span>
                     {localRelease?.iso_3166_1} {certification}
                   </span>
+                )}
+                {externalIds.data?.imdb_id && (
+                  <a
+                    className="external-link"
+                    href={`https://www.imdb.com/title/${externalIds.data.imdb_id}/`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    IMDb
+                  </a>
                 )}
                 <button
                   className="watch-trailer"

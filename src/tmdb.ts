@@ -78,6 +78,7 @@ type ReleaseDatesResponse = {
     release_dates: { certification: string; release_date: string; type: number }[];
   }[];
 };
+type ExternalIdsResponse = { imdb_id: string | null };
 const baseUrl = "https://api.themoviedb.org/3";
 const apiKey = import.meta.env.VITE_TMDB_API_KEY;
 
@@ -131,6 +132,8 @@ export const getCollection = (id: number) =>
   request<CollectionResponse>(`/collection/${id}`);
 export const getReleaseDates = (id: number) =>
   request<ReleaseDatesResponse>(`/movie/${id}/release_dates`);
+export const getExternalIds = (id: number) =>
+  request<ExternalIdsResponse>(`/movie/${id}/external_ids`);
 export const searchMovies = (query: string) =>
   request<ListResponse>("/search/movie", { query, include_adult: "false" });
 export const image = (path: string | null, size = "w780") =>
