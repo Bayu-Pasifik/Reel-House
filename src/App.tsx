@@ -486,6 +486,7 @@ function DetailPage({
 
 export default function App() {
   const root = useRef<HTMLElement>(null);
+  const trailerCloseRef = useRef<HTMLButtonElement>(null);
   const [query, setQuery] = useState("");
   const [submitted, setSubmitted] = useState("");
   const [activeGenre, setActiveGenre] = useState<number | null>(null);
@@ -610,6 +611,14 @@ export default function App() {
 
   useEffect(() => { localStorage.setItem("reelhouse:favorites", JSON.stringify(favorites)); }, [favorites]);
 
+  useEffect(() => {
+    if (!trailerMovie) return;
+    trailerCloseRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setTrailerMovie(null); };
+    addEventListener("keydown", onKeyDown);
+    return () => removeEventListener("keydown", onKeyDown);
+  }, [trailerMovie]);
+
   function onSearch(event: FormEvent) {
     event.preventDefault();
     setSubmitted(query.trim());
@@ -655,6 +664,7 @@ export default function App() {
               onClick={(event) => event.stopPropagation()}
             >
               <button
+                ref={trailerCloseRef}
                 className="modal-close"
                 onClick={() => setTrailerMovie(null)}
                 aria-label="Close trailer"
@@ -897,8 +907,9 @@ export default function App() {
             aria-labelledby="trailer-title"
             onClick={(event) => event.stopPropagation()}
           >
-            <button
-              className="modal-close"
+              <button
+                ref={trailerCloseRef}
+                className="modal-close"
               onClick={() => setTrailerMovie(null)}
               aria-label="Close trailer"
             >
