@@ -103,17 +103,81 @@ function Rail({
   onSelect: (movie: Movie) => void;
   onViewAll?: () => void;
 }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const drag = useRef({ active: false, startX: 0, scrollLeft: 0, moved: false });
+  const suppressClick = useRef(false);
+
   if (!movies?.length) return null;
+
+  function scrollRail(direction: -1 | 1) {
+    trackRef.current?.scrollBy({
+      left: trackRef.current.clientWidth * direction * 0.8,
+      behavior: "smooth",
+    });
+  }
+
   return (
     <section className="rail" aria-label={title}>
       <div className="rail-heading">
         <span>{index}</span>
         <h2>{title}</h2>
-        <button aria-label={`Browse ${title}`} onClick={onViewAll} disabled={!onViewAll}>
-          View all <i>↗</i>
-        </button>
+        <div className="rail-actions">
+          {onViewAll && (
+            <button aria-label={`Browse ${title}`} onClick={onViewAll}>
+              View all <i>↗</i>
+            </button>
+          )}
+          <button
+            className="rail-control"
+            type="button"
+            aria-label={`Show previous ${title}`}
+            onClick={() => scrollRail(-1)}
+          >
+            Prev
+          </button>
+          <button
+            className="rail-control"
+            type="button"
+            aria-label={`Show next ${title}`}
+            onClick={() => scrollRail(1)}
+          >
+            Next
+          </button>
+        </div>
       </div>
-      <div className="rail-track">
+      <div
+        ref={trackRef}
+        className="rail-track"
+        onPointerDown={(event) => {
+          if (event.pointerType === "mouse" && event.button !== 0) return;
+          drag.current = {
+            active: true,
+            startX: event.clientX,
+            scrollLeft: event.currentTarget.scrollLeft,
+            moved: false,
+          };
+          event.currentTarget.setPointerCapture(event.pointerId);
+        }}
+        onPointerMove={(event) => {
+          if (!drag.current.active) return;
+          const distance = event.clientX - drag.current.startX;
+          if (Math.abs(distance) > 4) drag.current.moved = true;
+          if (drag.current.moved) event.currentTarget.scrollLeft = drag.current.scrollLeft - distance;
+        }}
+        onPointerUp={(event) => {
+          if (!drag.current.active) return;
+          suppressClick.current = drag.current.moved;
+          drag.current.active = false;
+          event.currentTarget.releasePointerCapture(event.pointerId);
+          window.setTimeout(() => { suppressClick.current = false; }, 0);
+        }}
+        onPointerCancel={() => { drag.current.active = false; }}
+        onClickCapture={(event) => {
+          if (!suppressClick.current) return;
+          event.preventDefault();
+          event.stopPropagation();
+        }}
+      >
         {movies.slice(0, 10).map((movie, itemIndex) => (
           <Poster
             key={movie.id}
