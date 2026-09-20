@@ -13,6 +13,10 @@ export type MovieDetails = Movie & {
 type ListResponse = { results: Movie[] }
 type Video = { id: string; key: string; name: string; site: string; type: string; official: boolean }
 type VideosResponse = { results: Video[] }
+type CreditsResponse = {
+  cast: { id: number; name: string; character: string; profile_path: string | null; order: number }[]
+  crew: { id: number; name: string; job: string }[]
+}
 const baseUrl = 'https://api.themoviedb.org/3'
 const apiKey = import.meta.env.VITE_TMDB_API_KEY
 
@@ -30,5 +34,6 @@ export const getUpcoming = () => request<ListResponse>('/movie/upcoming')
 export const getMovieDetails = (id: number) => request<MovieDetails>(`/movie/${id}`)
 export const getRecommendations = (id: number) => request<ListResponse>(`/movie/${id}/recommendations`)
 export const getMovieVideos = (id: number) => request<VideosResponse>(`/movie/${id}/videos`)
+export const getMovieCredits = (id: number) => request<CreditsResponse>(`/movie/${id}/credits`)
 export const searchMovies = (query: string) => request<ListResponse>('/search/movie', { query, include_adult: 'false' })
 export const image = (path: string | null, size = 'w780') => path ? `https://image.tmdb.org/t/p/${size}${path}` : ''
