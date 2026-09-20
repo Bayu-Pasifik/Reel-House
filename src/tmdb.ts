@@ -21,6 +21,9 @@ type WatchProvider = { provider_id: number; provider_name: string; logo_path: st
 type WatchProvidersResponse = {
   results: Record<string, { link?: string; flatrate?: WatchProvider[]; rent?: WatchProvider[]; buy?: WatchProvider[] }>
 }
+type ReviewsResponse = {
+  results: { id: string; author: string; content: string; created_at: string; author_details: { rating: number | null } }[]
+}
 const baseUrl = 'https://api.themoviedb.org/3'
 const apiKey = import.meta.env.VITE_TMDB_API_KEY
 
@@ -40,5 +43,6 @@ export const getRecommendations = (id: number) => request<ListResponse>(`/movie/
 export const getMovieVideos = (id: number) => request<VideosResponse>(`/movie/${id}/videos`)
 export const getMovieCredits = (id: number) => request<CreditsResponse>(`/movie/${id}/credits`)
 export const getWatchProviders = (id: number) => request<WatchProvidersResponse>(`/movie/${id}/watch/providers`)
+export const getMovieReviews = (id: number) => request<ReviewsResponse>(`/movie/${id}/reviews`)
 export const searchMovies = (query: string) => request<ListResponse>('/search/movie', { query, include_adult: 'false' })
 export const image = (path: string | null, size = 'w780') => path ? `https://image.tmdb.org/t/p/${size}${path}` : ''
