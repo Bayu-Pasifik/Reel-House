@@ -106,12 +106,23 @@ function Rail({
   const trackRef = useRef<HTMLDivElement>(null);
   const drag = useRef({ active: false, startX: 0, scrollLeft: 0, moved: false });
   const suppressClick = useRef(false);
+  const lastScrollLeft = useRef(0);
+  const isWrapping = useRef(false);
 
   if (!movies?.length) return null;
 
   function scrollRail(direction: -1 | 1) {
-    trackRef.current?.scrollBy({
-      left: trackRef.current.clientWidth * direction * 0.8,
+    const track = trackRef.current;
+    if (!track) return;
+    const limit = track.scrollWidth - track.clientWidth;
+    const atStart = track.scrollLeft <= 1;
+    const atEnd = track.scrollLeft >= limit - 1;
+    if ((direction === 1 && atEnd) || (direction === -1 && atStart)) {
+      track.scrollLeft = direction === 1 ? 0 : limit;
+      return;
+    }
+    track.scrollBy({
+      left: track.clientWidth * direction * 0.8,
       behavior: "smooth",
     });
   }
@@ -148,6 +159,19 @@ function Rail({
       <div
         ref={trackRef}
         className="rail-track"
+        onScroll={(event) => {
+          const track = event.currentTarget;
+          const limit = track.scrollWidth - track.clientWidth;
+          const scrollingForward = track.scrollLeft > lastScrollLeft.current;
+          lastScrollLeft.current = track.scrollLeft;
+          if (!scrollingForward || isWrapping.current || limit <= 0 || track.scrollLeft < limit - 1) return;
+          isWrapping.current = true;
+          requestAnimationFrame(() => {
+            track.scrollLeft = 0;
+            lastScrollLeft.current = 0;
+            isWrapping.current = false;
+          });
+        }}
         onPointerDown={(event) => {
           if (event.pointerType === "touch") return;
           if (event.pointerType === "mouse" && event.button !== 0) return;
