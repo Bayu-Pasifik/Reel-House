@@ -127,12 +127,15 @@ const browsePaths: Record<BrowseSource, string> = {
 };
 export const browseMovies = (source: BrowseSource, page: number) =>
   request<ListResponse>(browsePaths[source], { page: String(page) });
-export const discoverByGenre = (genreId: number) =>
+export const discoverByGenre = (genreId: number, filters: Record<string, string> = {}) =>
   request<ListResponse>("/discover/movie", {
     with_genres: String(genreId),
     sort_by: "popularity.desc",
     "vote_count.gte": "50",
+    ...filters,
   });
+type ProviderListResponse = { results: { provider_id: number; provider_name: string }[] };
+export const getMovieProviders = (region: string) => request<ProviderListResponse>("/watch/providers/movie", { watch_region: region });
 export const getMovieDetails = (id: number) =>
   request<MovieDetails>(`/movie/${id}`);
 export const getRecommendations = (id: number) =>

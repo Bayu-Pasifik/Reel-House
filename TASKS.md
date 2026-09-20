@@ -20,7 +20,7 @@
 ## Later
 
 - [x] Evaluasi pencarian multi-entitas untuk sutradara dan pemeran — ditunda sampai detail person dan filmografi siap dibangun end-to-end.
-- [ ] Tambahkan filter discovery lanjutan: tahun, rating, bahasa, dan provider.
+- [x] Tambahkan filter discovery lanjutan: tahun, rating, bahasa, dan provider.
 - [ ] Evaluasi routing berbasis path jika deployment mendukung fallback SPA.
 - [ ] Tambahkan analitik yang menghormati privasi setelah metrik produk disepakati.
 

@@ -12,6 +12,7 @@ import {
   getMovieImages,
   getMovieReviews,
   getMovieVideos,
+  getMovieProviders,
   getNowPlaying,
   getPopular,
   getRecommendations,
@@ -490,6 +491,10 @@ export default function App() {
   const [query, setQuery] = useState("");
   const [submitted, setSubmitted] = useState("");
   const [activeGenre, setActiveGenre] = useState<number | null>(null);
+  const [filterYear, setFilterYear] = useState("");
+  const [filterRating, setFilterRating] = useState("");
+  const [filterLanguage, setFilterLanguage] = useState("");
+  const [filterProvider, setFilterProvider] = useState("");
   const [selectedMovieId, setSelectedMovieId] = useState<number | null>(
     () => Number(location.hash.match(/^#movie\/(\d+)$/)?.[1]) || null,
   );
@@ -528,10 +533,11 @@ export default function App() {
     enabled: submitted.length > 1,
   });
   const genreResults = useQuery({
-    queryKey: ["movies", "discover", activeGenre],
-    queryFn: () => discoverByGenre(activeGenre!),
+    queryKey: ["movies", "discover", activeGenre, filterYear, filterRating, filterLanguage, filterProvider],
+    queryFn: () => discoverByGenre(activeGenre!, { ...(filterYear && { primary_release_year: filterYear }), ...(filterRating && { "vote_average.gte": filterRating }), ...(filterLanguage && { with_original_language: filterLanguage }), ...(filterProvider && { watch_region: "ID", with_watch_providers: filterProvider }) }),
     enabled: activeGenre !== null,
   });
+  const providers = useQuery({ queryKey: ["movie-providers", "ID"], queryFn: () => getMovieProviders("ID") });
   const videos = useQuery({
     queryKey: ["movie", trailerMovie?.id, "videos"],
     queryFn: () => getMovieVideos(trailerMovie!.id),
@@ -801,6 +807,12 @@ export default function App() {
                 {name}
               </button>
             ))}
+          </div>
+          <div className="discovery-controls">
+            <input type="number" placeholder="Year" value={filterYear} onChange={(e) => setFilterYear(e.target.value)} />
+            <select value={filterRating} onChange={(e) => setFilterRating(e.target.value)}><option value="">Any rating</option><option value="7">7.0+</option><option value="8">8.0+</option></select>
+            <select value={filterLanguage} onChange={(e) => setFilterLanguage(e.target.value)}><option value="">Any language</option><option value="en">English</option><option value="id">Indonesian</option><option value="ja">Japanese</option><option value="ko">Korean</option></select>
+            <select value={filterProvider} onChange={(e) => setFilterProvider(e.target.value)}><option value="">Any provider</option>{providers.data?.results.map((provider) => <option key={provider.provider_id} value={provider.provider_id}>{provider.provider_name}</option>)}</select>
           </div>
         </section>
         {submitted && (

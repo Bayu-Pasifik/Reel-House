@@ -332,6 +332,7 @@ button {
   flex-wrap: wrap;
   gap: 8px;
 }
+.discovery-controls { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }.discovery-controls input,.discovery-controls select { min-height: 36px; border: 1px solid rgba(255,255,255,.14); border-radius: 8px; background:#16171d; color:#e4ded2; padding:0 10px; font-size:11px; }
 .genre-filter button {
   padding: 8px 12px;
   border: 1px solid rgba(255, 255, 255, 0.13);
