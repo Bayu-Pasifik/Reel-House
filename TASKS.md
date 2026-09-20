@@ -29,5 +29,5 @@
 - Perilaku pengguna dan data endpoint yang dipakai terdokumentasi di PRD atau task terkait.
 - Loading, data kosong, dan kegagalan endpoint memiliki perilaku yang jelas.
 - `npm run build` dan pemeriksaan diff selesai.
-- Satu fitur dikomit dan dipush secara terpisah ke GitHub.
-
+- Checklist terkait diperbarui di dokumen ini sebelum commit dibuat.
+- Satu fitur beserta pembaruan checklist dikomit dan dipush secara terpisah ke GitHub.
