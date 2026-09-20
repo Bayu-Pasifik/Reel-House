@@ -99,6 +99,12 @@ Poster shells use 8px corners with 6px media corners. Controls use compact recta
 - **Poster card:** near-edge-to-edge art with a short bottom gradient, compact metadata, and a focused yellow outline.
 - **Rail:** a bold title, a low-emphasis browse action, and horizontally scrollable posters. On mobile, preserve the rail rather than forcing a dense fixed grid.
 
+### Detail page
+
+- **Hero:** backdrop-led film title, concise genre/year line, scanable facts, then two adjacent actions: save and trailer.
+- **Information flow:** synopsis starts as a two-column editorial break, followed by clearly separated availability, cast, gallery, reviews, collection, and related-title sections.
+- **Availability:** provider logos are practical destinations, grouped by stream, rent, and buy; the region selector stays visible beside the section title.
+
 ### Inputs / Fields
 
 - **Search:** graphite field, body-font input, and a high-contrast yellow action area.

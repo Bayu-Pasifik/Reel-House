@@ -225,10 +225,10 @@ function DetailPage({
   return (
     <main className="detail-page">
       <nav className="detail-nav">
-        <button onClick={onBack}>Back to discovery</button>
         <a className="wordmark" href="#top" onClick={onBack}>
           REEL<span>HOUSE</span>
         </a>
+        <button onClick={onBack}>Back to discovery</button>
       </nav>
       {details.isLoading ? (
         <p className="detail-status status">Opening the film file…</p>
@@ -276,11 +276,16 @@ function DetailPage({
                     IMDb
                   </a>
                 )}
-                <button className="watch-trailer" onClick={() => onToggleFavorite(details.data)}>
+              </div>
+              <div className="detail-actions">
+                <button
+                  className="detail-action"
+                  onClick={() => onToggleFavorite(details.data)}
+                >
                   {isFavorite ? "Remove favorite" : "Save favorite"}
                 </button>
                 <button
-                  className="watch-trailer"
+                  className="detail-action detail-action-primary"
                   onClick={() => onTrailer(details.data)}
                 >
                   Watch trailer <i>▶</i>
