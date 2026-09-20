@@ -149,6 +149,7 @@ function Rail({
         ref={trackRef}
         className="rail-track"
         onPointerDown={(event) => {
+          if (event.pointerType === "touch") return;
           if (event.pointerType === "mouse" && event.button !== 0) return;
           drag.current = {
             active: true,
