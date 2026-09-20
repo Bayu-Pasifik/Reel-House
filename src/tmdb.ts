@@ -26,5 +26,6 @@ export const getTrending = () => request<ListResponse>('/trending/movie/week')
 export const getPopular = () => request<ListResponse>('/movie/popular')
 export const getUpcoming = () => request<ListResponse>('/movie/upcoming')
 export const getMovieDetails = (id: number) => request<MovieDetails>(`/movie/${id}`)
+export const getRecommendations = (id: number) => request<ListResponse>(`/movie/${id}/recommendations`)
 export const searchMovies = (query: string) => request<ListResponse>('/search/movie', { query, include_adult: 'false' })
 export const image = (path: string | null, size = 'w780') => path ? `https://image.tmdb.org/t/p/${size}${path}` : ''

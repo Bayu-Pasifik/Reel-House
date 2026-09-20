@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { gsap } from 'gsap'
-import { getMovieDetails, getPopular, getTrending, getUpcoming, image, searchMovies, type Movie } from './tmdb'
+import { getMovieDetails, getPopular, getRecommendations, getTrending, getUpcoming, image, searchMovies, type Movie } from './tmdb'
 
 const genres: Record<number, string> = { 28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy', 80: 'Crime', 18: 'Drama', 27: 'Horror', 878: 'Sci-Fi', 53: 'Thriller' }
 const year = (date: string) => date?.slice(0, 4) || '—'
@@ -35,6 +35,7 @@ export default function App() {
   const upcoming = useQuery({ queryKey: ['movies', 'upcoming'], queryFn: getUpcoming })
   const results = useQuery({ queryKey: ['movies', 'search', submitted], queryFn: () => searchMovies(submitted), enabled: submitted.length > 1 })
   const details = useQuery({ queryKey: ['movie', selectedMovie?.id], queryFn: () => getMovieDetails(selectedMovie!.id), enabled: Boolean(selectedMovie) })
+  const recommendations = useQuery({ queryKey: ['movie', selectedMovie?.id, 'recommendations'], queryFn: () => getRecommendations(selectedMovie!.id), enabled: Boolean(selectedMovie) })
   const featured = trending.data?.results[0]
 
   useEffect(() => {
@@ -72,7 +73,7 @@ export default function App() {
     <footer id="about"><a className="wordmark" href="#top">REEL<span>HOUSE</span></a><p>A living index for the cinema obsessed.</p><small>Data & imagery: TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.</small></footer>
     {selectedMovie && <div className="detail-backdrop" role="presentation" onClick={() => setSelectedMovie(null)}><section className="detail-modal" role="dialog" aria-modal="true" aria-labelledby="detail-title" onClick={event => event.stopPropagation()}>
       <button className="modal-close" onClick={() => setSelectedMovie(null)} aria-label="Close film details">×</button>
-      {details.isLoading ? <p className="status">Opening the film file…</p> : details.data ? <><div className="detail-art" style={details.data.backdrop_path ? { backgroundImage: `url(${image(details.data.backdrop_path, 'w1280')})` } : undefined} /><div className="detail-body"><p className="eyebrow">{details.data.genres.map(genre => genre.name).join(' / ') || 'Feature film'} <em>•</em> {year(details.data.release_date)}</p><h2 id="detail-title">{details.data.title}</h2>{details.data.tagline && <p className="detail-tagline">{details.data.tagline}</p>}<p className="detail-overview">{details.data.overview || 'No synopsis is available for this title.'}</p><div className="detail-facts"><span>{details.data.vote_average.toFixed(1)} rating</span>{details.data.runtime && <span>{details.data.runtime} min</span>}<span>{details.data.status}</span></div></div></> : <p className="status">Film details are unavailable. Please try another title.</p>}
+      {details.isLoading ? <p className="status">Opening the film file…</p> : details.data ? <><div className="detail-art" style={details.data.backdrop_path ? { backgroundImage: `url(${image(details.data.backdrop_path, 'w1280')})` } : undefined} /><div className="detail-body"><p className="eyebrow">{details.data.genres.map(genre => genre.name).join(' / ') || 'Feature film'} <em>•</em> {year(details.data.release_date)}</p><h2 id="detail-title">{details.data.title}</h2>{details.data.tagline && <p className="detail-tagline">{details.data.tagline}</p>}<p className="detail-overview">{details.data.overview || 'No synopsis is available for this title.'}</p><div className="detail-facts"><span>{details.data.vote_average.toFixed(1)} rating</span>{details.data.runtime && <span>{details.data.runtime} min</span>}<span>{details.data.status}</span></div>{recommendations.data?.results.length ? <section className="recommendations" aria-label="Recommended films"><p className="eyebrow">Continue watching</p><h3>More to discover</h3><div className="recommendation-track">{recommendations.data.results.slice(0, 6).map(movie => <Poster key={movie.id} movie={movie} onSelect={setSelectedMovie} />)}</div></section> : null}</div></> : <p className="status">Film details are unavailable. Please try another title.</p>}
     </section></div>}
   </main>
 }
