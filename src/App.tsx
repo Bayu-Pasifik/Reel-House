@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import InfiniteScroll from "react-infinite-scroller";
 import { gsap } from "gsap";
 import { track } from "./analytics";
 import {
@@ -107,16 +108,21 @@ function Rail({
   const drag = useRef({ active: false, startX: 0, scrollLeft: 0, moved: false });
   const suppressClick = useRef(false);
   const railMovies = movies?.slice(0, 10) ?? [];
-  const infiniteMovies = [...railMovies, ...railMovies, ...railMovies];
+  const [railItems, setRailItems] = useState<Movie[]>(railMovies);
+  const loadingMore = useRef(false);
 
   useEffect(() => {
-    const track = trackRef.current;
-    if (!track || railMovies.length < 2) return;
-    const middleCopyStart = track.scrollWidth / 3;
-    track.scrollLeft = middleCopyStart;
+    setRailItems(railMovies);
   }, [movies]);
 
   if (!railMovies.length) return null;
+
+  function loadMoreRailItems() {
+    if (loadingMore.current) return;
+    loadingMore.current = true;
+    setRailItems((current) => [...current, ...railMovies]);
+    requestAnimationFrame(() => { loadingMore.current = false; });
+  }
 
   function scrollRail(direction: -1 | 1) {
     const track = trackRef.current;
@@ -156,19 +162,23 @@ function Rail({
           </button>
         </div>
       </div>
-      <div
-        ref={trackRef}
-        className="rail-track"
-        onScroll={(event) => {
-          const track = event.currentTarget;
-          const copyWidth = track.scrollWidth / 3;
-          if (!copyWidth) return;
-          if (track.scrollLeft < copyWidth * 0.1) {
-            track.scrollLeft += copyWidth;
-          } else if (track.scrollLeft > copyWidth * 1.9) {
-            track.scrollLeft -= copyWidth;
-          }
-        }}
+      <InfiniteScroll
+        pageStart={0}
+        loadMore={loadMoreRailItems}
+        hasMore
+        initialLoad={false}
+        useWindow={false}
+        getScrollParent={() => trackRef.current}
+      >
+        <div
+          ref={trackRef}
+          className="rail-track"
+          onScroll={(event) => {
+            const track = event.currentTarget;
+            if (track.scrollLeft + track.clientWidth >= track.scrollWidth - track.clientWidth * 0.6) {
+              loadMoreRailItems();
+            }
+          }}
         onPointerDown={(event) => {
           if (event.pointerType === "touch") return;
           if (event.pointerType === "mouse" && event.button !== 0) return;
@@ -200,15 +210,16 @@ function Rail({
           event.stopPropagation();
         }}
       >
-        {infiniteMovies.map((movie, itemIndex) => (
+        {railItems.map((movie, itemIndex) => (
           <Poster
             key={`${movie.id}-${itemIndex}`}
             movie={movie}
-            priority={itemIndex >= railMovies.length && itemIndex < railMovies.length + 3}
+            priority={itemIndex < 3}
             onSelect={onSelect}
           />
         ))}
-      </div>
+        </div>
+      </InfiniteScroll>
     </section>
   );
 }
