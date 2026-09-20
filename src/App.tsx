@@ -114,6 +114,21 @@ function Rail({
   );
 }
 
+function DetailNotice({
+  title,
+  message,
+}: {
+  title: string;
+  message: string;
+}) {
+  return (
+    <section className="detail-notice" aria-label={title}>
+      <h2>{title}</h2>
+      <p>{message}</p>
+    </section>
+  );
+}
+
 function DetailPage({
   movieId,
   onBack,
@@ -246,7 +261,7 @@ function DetailPage({
                   "No synopsis is available for this title."}
               </p>
             </div>
-            {collection.data?.parts.length ? (
+            {details.data.belongs_to_collection && collection.data?.parts.length ? (
               <section
                 className="collection"
                 aria-label={`The ${collection.data.name} collection`}
@@ -259,6 +274,11 @@ function DetailPage({
                   ))}
                 </div>
               </section>
+            ) : details.data.belongs_to_collection ? (
+              <DetailNotice
+                title="Collection"
+                message={collection.isError ? "This collection could not be loaded right now." : "No other films in this collection are available yet."}
+              />
             ) : null}
             {gallery.data?.backdrops.length ? (
               <section className="gallery" aria-label="Film gallery">
@@ -278,8 +298,13 @@ function DetailPage({
                     ))}
                 </div>
               </section>
-            ) : null}
-            {availability && (
+            ) : (
+              <DetailNotice
+                title="Visual world"
+                message={gallery.isError ? "Official film images could not be loaded right now." : "No official backdrop images are available for this film."}
+              />
+            )}
+            {availability ? (
               <section
                 className="watch-providers"
                 aria-label="Where to watch in Indonesia"
@@ -324,6 +349,11 @@ function DetailPage({
                     ))}
                 </div>
               </section>
+            ) : (
+              <DetailNotice
+                title="Where to watch"
+                message={watchProviders.isError ? "Streaming availability could not be loaded right now." : "No streaming, rental, or purchase providers are listed for Indonesia."}
+              />
             )}
             {credits.data?.cast.length ? (
               <section className="credits" aria-label="Cast and crew">
@@ -348,7 +378,12 @@ function DetailPage({
                   ))}
                 </div>
               </section>
-            ) : null}
+            ) : (
+              <DetailNotice
+                title="Cast and crew"
+                message={credits.isError ? "Cast and crew could not be loaded right now." : "No cast or crew information is available for this film."}
+              />
+            )}
             {reviews.data?.results.length ? (
               <section className="reviews" aria-label="Audience reviews">
                 <h2>Audience notes</h2>
@@ -375,7 +410,12 @@ function DetailPage({
                   ))}
                 </div>
               </section>
-            ) : null}
+            ) : (
+              <DetailNotice
+                title="Audience notes"
+                message={reviews.isError ? "Audience reviews could not be loaded right now." : "No audience reviews are available for this film yet."}
+              />
+            )}
             {recommendations.data?.results.length ? (
               <section
                 className="recommendations"
@@ -388,7 +428,12 @@ function DetailPage({
                   ))}
                 </div>
               </section>
-            ) : null}
+            ) : (
+              <DetailNotice
+                title="More to discover"
+                message={recommendations.isError ? "Recommendations could not be loaded right now." : "No recommendations are available for this film yet."}
+              />
+            )}
           </section>
         </>
       ) : (

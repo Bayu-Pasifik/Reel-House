@@ -10,7 +10,7 @@
 
 ## Next
 
-- [ ] Tambahkan state error dan empty state yang spesifik untuk setiap bagian detail yang datanya tidak tersedia.
+- [x] Tambahkan state error dan empty state yang spesifik untuk setiap bagian detail yang datanya tidak tersedia.
 - [ ] Tambahkan halaman/flow "View all" untuk setiap rail, termasuk pagination.
 - [ ] Tambahkan pemilihan wilayah provider tontonan; Indonesia tetap menjadi default.
 - [ ] Tambahkan penyimpanan favorit lokal agar pengguna dapat membandingkan film sebelum menonton.

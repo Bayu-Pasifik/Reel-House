@@ -905,6 +905,25 @@ footer small {
 .detail-status {
   padding: 180px max(5vw, 32px);
 }
+.detail-notice {
+  margin-top: 70px;
+  padding: 28px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.detail-notice h2 {
+  margin: 0 0 10px;
+  font:
+    600 clamp(30px, 4vw, 48px) / 0.98 "Playfair Display",
+    serif;
+  letter-spacing: -0.035em;
+}
+.detail-notice p {
+  max-width: 62ch;
+  margin: 0;
+  color: #a9a397;
+  font-size: 13px;
+  line-height: 1.7;
+}
 @media (max-width: 760px) {
   .detail-nav {
     width: calc(100% - 40px);
@@ -937,6 +956,9 @@ footer small {
   }
   .cast-track {
     grid-auto-columns: 92px;
+  }
+  .detail-notice {
+    margin-top: 54px;
   }
 }
 .watch-providers {
