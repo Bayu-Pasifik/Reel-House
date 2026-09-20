@@ -39,6 +39,7 @@ Masyarakat umum yang mencari informasi film sebelum menonton, baik di bioskop ma
 - Pengguna dapat menemukan trailer atau informasi ketersediaan menonton bila TMDB menyediakannya.
 - Halaman detail dapat dibuka kembali melalui URL hash film.
 - Build produksi (`npm run build`) berhasil.
+- Metrik agregat lokal mencatat pencarian, buka detail, dan buka trailer tanpa mengirim data pengguna ke layanan eksternal.
 
 ## Di luar ruang lingkup saat ini
 

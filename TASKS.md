@@ -22,7 +22,7 @@
 - [x] Evaluasi pencarian multi-entitas untuk sutradara dan pemeran — ditunda sampai detail person dan filmografi siap dibangun end-to-end.
 - [x] Tambahkan filter discovery lanjutan: tahun, rating, bahasa, dan provider.
 - [x] Evaluasi routing berbasis path — hash route dipertahankan sampai hosting menyediakan fallback SPA yang dikonfirmasi.
-- [ ] Tambahkan analitik yang menghormati privasi setelah metrik produk disepakati.
+- [x] Tambahkan analitik lokal yang menghormati privasi untuk pencarian, buka detail, dan buka trailer.
 
 ## Definition of done untuk fitur baru
 

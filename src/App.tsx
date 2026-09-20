@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { gsap } from "gsap";
+import { track } from "./analytics";
 import {
   browseMovies,
   discoverByGenre,
@@ -627,9 +628,11 @@ export default function App() {
 
   function onSearch(event: FormEvent) {
     event.preventDefault();
+    track("search_submitted");
     setSubmitted(query.trim());
   }
   function openMovie(movie: Movie) {
+    track("movie_detail_opened");
     location.hash = `movie/${movie.id}`;
   }
   function closeMovie() {
@@ -652,7 +655,7 @@ export default function App() {
           movieId={selectedMovieId}
           onBack={closeMovie}
           onSelect={openMovie}
-          onTrailer={setTrailerMovie}
+          onTrailer={(movie) => { track("trailer_opened"); setTrailerMovie(movie); }}
           isFavorite={favorites.some((movie) => movie.id === selectedMovieId)}
           onToggleFavorite={toggleFavorite}
         />
@@ -748,7 +751,7 @@ export default function App() {
             </a>
             <button
               className="text-action"
-              onClick={() => featured && setTrailerMovie(featured)}
+              onClick={() => { if (featured) { track("trailer_opened"); setTrailerMovie(featured); } }}
               disabled={!featured}
             >
               Watch trailer <i>▶</i>
