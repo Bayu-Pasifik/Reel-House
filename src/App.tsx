@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { gsap } from 'gsap'
-import { discoverByGenre, getCollection, getMovieCredits, getMovieDetails, getMovieImages, getMovieReviews, getMovieVideos, getPopular, getRecommendations, getTopRated, getTrending, getUpcoming, getWatchProviders, image, searchMovies, type Movie } from './tmdb'
+import { discoverByGenre, getCollection, getMovieCredits, getMovieDetails, getMovieImages, getMovieReviews, getMovieVideos, getNowPlaying, getPopular, getRecommendations, getTopRated, getTrending, getUpcoming, getWatchProviders, image, searchMovies, type Movie } from './tmdb'
 
 const genres: Record<number, string> = { 28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy', 80: 'Crime', 18: 'Drama', 27: 'Horror', 878: 'Sci-Fi', 53: 'Thriller' }
 const year = (date: string) => date?.slice(0, 4) || '—'
@@ -53,6 +53,7 @@ export default function App() {
   const popular = useQuery({ queryKey: ['movies', 'popular'], queryFn: getPopular })
   const upcoming = useQuery({ queryKey: ['movies', 'upcoming'], queryFn: getUpcoming })
   const topRated = useQuery({ queryKey: ['movies', 'top-rated'], queryFn: getTopRated })
+  const nowPlaying = useQuery({ queryKey: ['movies', 'now-playing'], queryFn: getNowPlaying })
   const results = useQuery({ queryKey: ['movies', 'search', submitted], queryFn: () => searchMovies(submitted), enabled: submitted.length > 1 })
   const genreResults = useQuery({ queryKey: ['movies', 'discover', activeGenre], queryFn: () => discoverByGenre(activeGenre!), enabled: activeGenre !== null })
   const videos = useQuery({ queryKey: ['movie', trailerMovie?.id, 'videos'], queryFn: () => getMovieVideos(trailerMovie!.id), enabled: Boolean(trailerMovie) })
@@ -68,7 +69,7 @@ export default function App() {
       gsap.fromTo('.reveal-card', { y: 42, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .9, stagger: .055, ease: 'power3.out', delay: .55 })
     }, root)
     return () => mm.revert()
-  }, [trending.isSuccess, popular.isSuccess, upcoming.isSuccess, topRated.isSuccess, submitted])
+  }, [trending.isSuccess, popular.isSuccess, upcoming.isSuccess, topRated.isSuccess, nowPlaying.isSuccess, submitted])
 
   useEffect(() => {
     const syncRoute = () => setSelectedMovieId(Number(location.hash.match(/^#movie\/(\d+)$/)?.[1]) || null)
@@ -79,7 +80,7 @@ export default function App() {
   function onSearch(event: FormEvent) { event.preventDefault(); setSubmitted(query.trim()) }
   function openMovie(movie: Movie) { location.hash = `movie/${movie.id}` }
   function closeMovie() { location.hash = 'top' }
-  const isLoading = trending.isLoading || popular.isLoading || upcoming.isLoading || topRated.isLoading
+  const isLoading = trending.isLoading || popular.isLoading || upcoming.isLoading || topRated.isLoading || nowPlaying.isLoading
 
   if (selectedMovieId) return <><DetailPage movieId={selectedMovieId} onBack={closeMovie} onSelect={openMovie} onTrailer={setTrailerMovie} />
     {trailerMovie && <div className="detail-backdrop" role="presentation" onClick={() => setTrailerMovie(null)}><section className="trailer-modal" role="dialog" aria-modal="true" aria-labelledby="trailer-title" onClick={event => event.stopPropagation()}><button className="modal-close" onClick={() => setTrailerMovie(null)} aria-label="Close trailer">×</button><h2 id="trailer-title">{trailerMovie.title} trailer</h2>{videos.isLoading ? <p className="status">Loading trailer…</p> : trailer ? <iframe src={`https://www.youtube-nocookie.com/embed/${trailer.key}?autoplay=1`} title={trailer.name} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen /> : <p className="status">No official YouTube trailer is available for this film.</p>}</section></div>}</>
@@ -102,7 +103,7 @@ export default function App() {
       <section className="genre-filter" aria-label="Browse by genre"><p>Browse by genre</p><div>{Object.entries(genres).map(([id, name]) => <button key={id} className={activeGenre === Number(id) ? 'active' : ''} onClick={() => setActiveGenre(activeGenre === Number(id) ? null : Number(id))} aria-pressed={activeGenre === Number(id)}>{name}</button>)}</div></section>
       {submitted && <section className="search-results"><div className="rail-heading"><span>00</span><h2>Results for “{submitted}”</h2><button onClick={() => { setQuery(''); setSubmitted('') }}>Clear <i>×</i></button></div>{results.isLoading ? <p className="status">Looking through the archive…</p> : <div className="result-grid">{results.data?.results.slice(0, 8).map(movie => <Poster key={movie.id} movie={movie} onSelect={openMovie} />) || <p className="status">No matching titles yet.</p>}</div>}</section>}
       {activeGenre && (genreResults.isLoading ? <p className="status">Finding {genres[activeGenre]} films…</p> : <Rail index="00" title={`${genres[activeGenre]} picks`} movies={genreResults.data?.results} onSelect={openMovie} />)}
-      {isLoading ? <p className="status">Curating the latest releases…</p> : <><Rail index="01" title="In the conversation" movies={trending.data?.results} onSelect={openMovie} /><Rail index="02" title="The essential popular" movies={popular.data?.results} onSelect={openMovie} /><Rail index="03" title="Highest rated" movies={topRated.data?.results} onSelect={openMovie} /><Rail index="04" title="Coming into focus" movies={upcoming.data?.results} onSelect={openMovie} /></>}
+      {isLoading ? <p className="status">Curating the latest releases…</p> : <><Rail index="01" title="In the conversation" movies={trending.data?.results} onSelect={openMovie} /><Rail index="02" title="Now playing" movies={nowPlaying.data?.results} onSelect={openMovie} /><Rail index="03" title="The essential popular" movies={popular.data?.results} onSelect={openMovie} /><Rail index="04" title="Highest rated" movies={topRated.data?.results} onSelect={openMovie} /><Rail index="05" title="Coming into focus" movies={upcoming.data?.results} onSelect={openMovie} /></>}
     </section>
     <footer id="about"><a className="wordmark" href="#top">REEL<span>HOUSE</span></a><p>A living index for the cinema obsessed.</p><small>Data & imagery: TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.</small></footer>
     {trailerMovie && <div className="detail-backdrop" role="presentation" onClick={() => setTrailerMovie(null)}><section className="trailer-modal" role="dialog" aria-modal="true" aria-labelledby="trailer-title" onClick={event => event.stopPropagation()}><button className="modal-close" onClick={() => setTrailerMovie(null)} aria-label="Close trailer">×</button><h2 id="trailer-title">{trailerMovie.title} trailer</h2>{videos.isLoading ? <p className="status">Loading trailer…</p> : trailer ? <iframe src={`https://www.youtube-nocookie.com/embed/${trailer.key}?autoplay=1`} title={trailer.name} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen /> : <p className="status">No official YouTube trailer is available for this film.</p>}</section></div>}
