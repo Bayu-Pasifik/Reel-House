@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { gsap } from 'gsap'
-import { getCollection, getMovieCredits, getMovieDetails, getMovieImages, getMovieReviews, getMovieVideos, getPopular, getRecommendations, getTrending, getUpcoming, getWatchProviders, image, searchMovies, type Movie } from './tmdb'
+import { discoverByGenre, getCollection, getMovieCredits, getMovieDetails, getMovieImages, getMovieReviews, getMovieVideos, getPopular, getRecommendations, getTrending, getUpcoming, getWatchProviders, image, searchMovies, type Movie } from './tmdb'
 
 const genres: Record<number, string> = { 28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy', 80: 'Crime', 18: 'Drama', 27: 'Horror', 878: 'Sci-Fi', 53: 'Thriller' }
 const year = (date: string) => date?.slice(0, 4) || '—'
@@ -46,12 +46,14 @@ export default function App() {
   const root = useRef<HTMLElement>(null)
   const [query, setQuery] = useState('')
   const [submitted, setSubmitted] = useState('')
+  const [activeGenre, setActiveGenre] = useState<number | null>(null)
   const [selectedMovieId, setSelectedMovieId] = useState<number | null>(() => Number(location.hash.match(/^#movie\/(\d+)$/)?.[1]) || null)
   const [trailerMovie, setTrailerMovie] = useState<Movie | null>(null)
   const trending = useQuery({ queryKey: ['movies', 'trending'], queryFn: getTrending })
   const popular = useQuery({ queryKey: ['movies', 'popular'], queryFn: getPopular })
   const upcoming = useQuery({ queryKey: ['movies', 'upcoming'], queryFn: getUpcoming })
   const results = useQuery({ queryKey: ['movies', 'search', submitted], queryFn: () => searchMovies(submitted), enabled: submitted.length > 1 })
+  const genreResults = useQuery({ queryKey: ['movies', 'discover', activeGenre], queryFn: () => discoverByGenre(activeGenre!), enabled: activeGenre !== null })
   const videos = useQuery({ queryKey: ['movie', trailerMovie?.id, 'videos'], queryFn: () => getMovieVideos(trailerMovie!.id), enabled: Boolean(trailerMovie) })
   const featured = trending.data?.results[0]
   const trailer = videos.data?.results.find(video => video.site === 'YouTube' && video.type === 'Trailer' && video.official) ?? videos.data?.results.find(video => video.site === 'YouTube' && video.type === 'Trailer')
@@ -96,7 +98,9 @@ export default function App() {
     <section id="discover" className="content">
       <div className="intro"><p className="eyebrow">The current edit</p><h2>Cinema for the curious<br /><i>and the restless.</i></h2><p>Browse what is moving culture forward. Data is supplied live by TMDB, intelligently cached to keep the experience calm and quick.</p></div>
       <form className="search-shell" onSubmit={onSearch}><div className="search-core"><label htmlFor="movie-search">Find a film</label><input id="movie-search" value={query} onChange={e => setQuery(e.target.value)} placeholder="Title, director, or a feeling…" /><button type="submit">Search <span>↗</span></button></div></form>
+      <section className="genre-filter" aria-label="Browse by genre"><p>Browse by genre</p><div>{Object.entries(genres).map(([id, name]) => <button key={id} className={activeGenre === Number(id) ? 'active' : ''} onClick={() => setActiveGenre(activeGenre === Number(id) ? null : Number(id))} aria-pressed={activeGenre === Number(id)}>{name}</button>)}</div></section>
       {submitted && <section className="search-results"><div className="rail-heading"><span>00</span><h2>Results for “{submitted}”</h2><button onClick={() => { setQuery(''); setSubmitted('') }}>Clear <i>×</i></button></div>{results.isLoading ? <p className="status">Looking through the archive…</p> : <div className="result-grid">{results.data?.results.slice(0, 8).map(movie => <Poster key={movie.id} movie={movie} onSelect={openMovie} />) || <p className="status">No matching titles yet.</p>}</div>}</section>}
+      {activeGenre && (genreResults.isLoading ? <p className="status">Finding {genres[activeGenre]} films…</p> : <Rail index="00" title={`${genres[activeGenre]} picks`} movies={genreResults.data?.results} onSelect={openMovie} />)}
       {isLoading ? <p className="status">Curating the latest releases…</p> : <><Rail index="01" title="In the conversation" movies={trending.data?.results} onSelect={openMovie} /><Rail index="02" title="The essential popular" movies={popular.data?.results} onSelect={openMovie} /><Rail index="03" title="Coming into focus" movies={upcoming.data?.results} onSelect={openMovie} /></>}
     </section>
     <footer id="about"><a className="wordmark" href="#top">REEL<span>HOUSE</span></a><p>A living index for the cinema obsessed.</p><small>Data & imagery: TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.</small></footer>
