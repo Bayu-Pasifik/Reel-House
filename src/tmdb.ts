@@ -18,7 +18,17 @@ export type MovieDetails = Movie & {
   belongs_to_collection: { id: number; name: string } | null;
 };
 
-type ListResponse = { results: Movie[] };
+export type ListResponse = {
+  page: number;
+  results: Movie[];
+  total_pages: number;
+};
+export type BrowseSource =
+  | "trending"
+  | "now-playing"
+  | "popular"
+  | "top-rated"
+  | "upcoming";
 type Video = {
   id: string;
   key: string;
@@ -108,6 +118,15 @@ export const getUpcoming = () => request<ListResponse>("/movie/upcoming");
 export const getTopRated = () => request<ListResponse>("/movie/top_rated");
 export const getNowPlaying = () => request<ListResponse>("/movie/now_playing");
 export const getLatest = () => request<Movie>("/movie/latest");
+const browsePaths: Record<BrowseSource, string> = {
+  trending: "/trending/movie/week",
+  "now-playing": "/movie/now_playing",
+  popular: "/movie/popular",
+  "top-rated": "/movie/top_rated",
+  upcoming: "/movie/upcoming",
+};
+export const browseMovies = (source: BrowseSource, page: number) =>
+  request<ListResponse>(browsePaths[source], { page: String(page) });
 export const discoverByGenre = (genreId: number) =>
   request<ListResponse>("/discover/movie", {
     with_genres: String(genreId),

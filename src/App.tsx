@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { gsap } from "gsap";
 import {
+  browseMovies,
   discoverByGenre,
   getCollection,
   getExternalIds,
@@ -22,6 +23,7 @@ import {
   image,
   searchMovies,
   type Movie,
+  type BrowseSource,
 } from "./tmdb";
 
 const genres: Record<number, string> = {
@@ -84,11 +86,13 @@ function Rail({
   index,
   movies,
   onSelect,
+  onViewAll,
 }: {
   title: string;
   index: string;
   movies?: Movie[];
   onSelect: (movie: Movie) => void;
+  onViewAll?: () => void;
 }) {
   if (!movies?.length) return null;
   return (
@@ -96,7 +100,7 @@ function Rail({
       <div className="rail-heading">
         <span>{index}</span>
         <h2>{title}</h2>
-        <button aria-label={`Browse ${title}`}>
+        <button aria-label={`Browse ${title}`} onClick={onViewAll} disabled={!onViewAll}>
           View all <i>↗</i>
         </button>
       </div>
@@ -112,6 +116,20 @@ function Rail({
       </div>
     </section>
   );
+}
+
+const browseTitles: Record<BrowseSource, string> = {
+  trending: "In the conversation",
+  "now-playing": "Now playing",
+  popular: "The essential popular",
+  "top-rated": "Highest rated",
+  upcoming: "Coming into focus",
+};
+
+function BrowsePage({ source, onBack, onSelect }: { source: BrowseSource; onBack: () => void; onSelect: (movie: Movie) => void }) {
+  const [page, setPage] = useState(1);
+  const movies = useQuery({ queryKey: ["browse", source, page], queryFn: () => browseMovies(source, page) });
+  return <main className="browse-page"><nav className="detail-nav"><button onClick={onBack}>Back to discovery</button><a className="wordmark" href="#top" onClick={onBack}>REEL<span>HOUSE</span></a></nav><section className="browse-content"><p className="eyebrow">The extended edit</p><h1>{browseTitles[source]}</h1>{movies.isLoading ? <p className="status">Loading more films…</p> : movies.isError ? <p className="status">This collection could not be loaded. Try again shortly.</p> : <><div className="browse-grid">{movies.data?.results.map(movie => <Poster key={movie.id} movie={movie} onSelect={onSelect} />)}</div><nav className="pagination" aria-label="Browse pages"><button disabled={page === 1} onClick={() => setPage(page - 1)}>Previous</button><span>Page {page} of {movies.data?.total_pages ?? 1}</span><button disabled={page >= (movies.data?.total_pages ?? 1)} onClick={() => setPage(page + 1)}>Next</button></nav></>}</section></main>;
 }
 
 function DetailNotice({
@@ -455,6 +473,7 @@ export default function App() {
     () => Number(location.hash.match(/^#movie\/(\d+)$/)?.[1]) || null,
   );
   const [trailerMovie, setTrailerMovie] = useState<Movie | null>(null);
+  const [browseSource, setBrowseSource] = useState<BrowseSource | null>(null);
   const trending = useQuery({
     queryKey: ["movies", "trending"],
     queryFn: getTrending,
@@ -633,6 +652,9 @@ export default function App() {
       </>
     );
 
+  if (browseSource)
+    return <BrowsePage source={browseSource} onBack={() => setBrowseSource(null)} onSelect={openMovie} />;
+
   return (
     <main ref={root}>
       <div className="grain" />
@@ -788,30 +810,35 @@ export default function App() {
               title="In the conversation"
               movies={trending.data?.results}
               onSelect={openMovie}
+              onViewAll={() => setBrowseSource("trending")}
             />
             <Rail
               index="02"
               title="Now playing"
               movies={nowPlaying.data?.results}
               onSelect={openMovie}
+              onViewAll={() => setBrowseSource("now-playing")}
             />
             <Rail
               index="03"
               title="The essential popular"
               movies={popular.data?.results}
               onSelect={openMovie}
+              onViewAll={() => setBrowseSource("popular")}
             />
             <Rail
               index="04"
               title="Highest rated"
               movies={topRated.data?.results}
               onSelect={openMovie}
+              onViewAll={() => setBrowseSource("top-rated")}
             />
             <Rail
               index="05"
               title="Coming into focus"
               movies={upcoming.data?.results}
               onSelect={openMovie}
+              onViewAll={() => setBrowseSource("upcoming")}
             />
           </>
         )}

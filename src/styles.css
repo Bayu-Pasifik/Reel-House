@@ -784,6 +784,7 @@ footer small {
   min-height: 100dvh;
   background: #090a0f;
 }
+.browse-page { min-height: 100dvh; background: #090a0f; }.browse-content { width: min(1180px, 100%); margin: 0 auto; padding: 150px max(5vw, 32px) 110px; }.browse-content > h1 { margin: 12px 0 42px; font: 600 clamp(46px, 7vw, 88px)/.94 'Playfair Display', serif; letter-spacing: -.04em; }.browse-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 15px; }.pagination { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 52px; }.pagination button { min-height: 40px; padding: 0 15px; border: 1px solid rgba(255,255,255,.15); border-radius: 999px; background: transparent; color: #e4ded2; font-size: 11px; }.pagination button:disabled { cursor: not-allowed; opacity: .4; }.pagination span { color: #a9a397; font: 10px 'DM Mono', monospace; }
 .detail-nav {
   position: absolute;
   z-index: 3;
@@ -961,6 +962,7 @@ footer small {
     margin-top: 54px;
   }
 }
+@media (max-width: 760px) { .browse-content { padding: 120px 20px 80px; }.browse-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }.pagination { gap: 10px; margin-top: 36px; } }
 .watch-providers {
   display: grid;
   grid-template-columns: minmax(190px, 0.65fr) minmax(0, 1.35fr);
