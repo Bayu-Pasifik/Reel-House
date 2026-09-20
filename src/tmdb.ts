@@ -8,6 +8,7 @@ export type MovieDetails = Movie & {
   genres: { id: number; name: string }[]
   tagline: string
   status: string
+  belongs_to_collection: { id: number; name: string } | null
 }
 
 type ListResponse = { results: Movie[] }
@@ -25,6 +26,7 @@ type ReviewsResponse = {
   results: { id: string; author: string; content: string; created_at: string; author_details: { rating: number | null } }[]
 }
 type ImagesResponse = { backdrops: { file_path: string; vote_average: number }[] }
+type CollectionResponse = { id: number; name: string; overview: string; parts: Movie[] }
 const baseUrl = 'https://api.themoviedb.org/3'
 const apiKey = import.meta.env.VITE_TMDB_API_KEY
 
@@ -46,5 +48,6 @@ export const getMovieCredits = (id: number) => request<CreditsResponse>(`/movie/
 export const getWatchProviders = (id: number) => request<WatchProvidersResponse>(`/movie/${id}/watch/providers`)
 export const getMovieReviews = (id: number) => request<ReviewsResponse>(`/movie/${id}/reviews`)
 export const getMovieImages = (id: number) => request<ImagesResponse>(`/movie/${id}/images`)
+export const getCollection = (id: number) => request<CollectionResponse>(`/collection/${id}`)
 export const searchMovies = (query: string) => request<ListResponse>('/search/movie', { query, include_adult: 'false' })
 export const image = (path: string | null, size = 'w780') => path ? `https://image.tmdb.org/t/p/${size}${path}` : ''
