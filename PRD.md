@@ -56,3 +56,4 @@ Pencarian multi-entitas untuk pemeran dan sutradara telah dievaluasi. Endpoint T
 - Kelengkapan setiap bagian bergantung pada data TMDB.
 - Endpoint, rate limit, dan ketersediaan provider TMDB dapat berubah.
 - API key harus tersedia sebagai `VITE_TMDB_API_KEY` di lingkungan aplikasi.
+- Routing detail tetap memakai hash sampai target hosting yang mendukung fallback SPA dikonfirmasi.
