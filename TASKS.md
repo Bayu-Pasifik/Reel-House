@@ -9,7 +9,7 @@
 - [x] Build produksi dan pengabaian `.env` di Git.
 - [x] Redesain visual katalog streaming berdasarkan referensi IDLIX, tanpa menyalin merek atau asetnya.
 - [x] Selaraskan halaman detail dengan pola katalog streaming: hero padat, metadata cepat dipindai, dan aksi tontonan jelas.
-- [x] Tambahkan rail kartu berulang: swipe native, drag mouse, dan tombol navigasi kembali ke awal setelah mencapai kartu terakhir.
+- [x] Tambahkan infinite horizontal carousel pada rail kartu tanpa loncatan kembali ke index 0.
 
 ## Next
 
