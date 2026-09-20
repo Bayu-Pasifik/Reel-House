@@ -47,9 +47,12 @@ Masyarakat umum yang mencari informasi film sebelum menonton, baik di bioskop ma
 - Data provider yang dijamin lengkap untuk seluruh wilayah atau seluruh film.
 - Konten review editorial internal.
 
+## Keputusan produk: pencarian multi-entitas
+
+Pencarian multi-entitas untuk pemeran dan sutradara telah dievaluasi. Endpoint TMDB `search/multi` dapat menemukan person, tetapi pengalaman yang berguna juga membutuhkan halaman detail person dan filmografi yang belum ada di scope saat ini. Pencarian judul film tetap menjadi mekanisme utama; pencarian person ditunda sampai alur detail person dapat diselesaikan end-to-end.
+
 ## Ketergantungan dan risiko
 
 - Kelengkapan setiap bagian bergantung pada data TMDB.
 - Endpoint, rate limit, dan ketersediaan provider TMDB dapat berubah.
 - API key harus tersedia sebagai `VITE_TMDB_API_KEY` di lingkungan aplikasi.
-
