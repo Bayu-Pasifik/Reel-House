@@ -72,6 +72,12 @@ type CollectionResponse = {
   overview: string;
   parts: Movie[];
 };
+type ReleaseDatesResponse = {
+  results: {
+    iso_3166_1: string;
+    release_dates: { certification: string; release_date: string; type: number }[];
+  }[];
+};
 const baseUrl = "https://api.themoviedb.org/3";
 const apiKey = import.meta.env.VITE_TMDB_API_KEY;
 
@@ -123,6 +129,8 @@ export const getMovieImages = (id: number) =>
   request<ImagesResponse>(`/movie/${id}/images`);
 export const getCollection = (id: number) =>
   request<CollectionResponse>(`/collection/${id}`);
+export const getReleaseDates = (id: number) =>
+  request<ReleaseDatesResponse>(`/movie/${id}/release_dates`);
 export const searchMovies = (query: string) =>
   request<ListResponse>("/search/movie", { query, include_adult: "false" });
 export const image = (path: string | null, size = "w780") =>

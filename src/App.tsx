@@ -13,6 +13,7 @@ import {
   getNowPlaying,
   getPopular,
   getRecommendations,
+  getReleaseDates,
   getTopRated,
   getTrending,
   getUpcoming,
@@ -152,10 +153,22 @@ function DetailPage({
     queryFn: () => getCollection(details.data!.belongs_to_collection!.id),
     enabled: Boolean(details.data?.belongs_to_collection),
   });
+  const releaseDates = useQuery({
+    queryKey: ["movie", movieId, "release-dates"],
+    queryFn: () => getReleaseDates(movieId),
+  });
   const director = credits.data?.crew.find(
     (member) => member.job === "Director",
   );
   const availability = watchProviders.data?.results.ID;
+  const localRelease =
+    releaseDates.data?.results.find(
+      (release) => release.iso_3166_1 === "ID",
+    ) ??
+    releaseDates.data?.results.find((release) => release.iso_3166_1 === "US");
+  const certification = localRelease?.release_dates.find(
+    (release) => release.certification,
+  )?.certification;
 
   return (
     <main className="detail-page">
@@ -196,6 +209,11 @@ function DetailPage({
                   <span>{details.data.runtime} min</span>
                 )}
                 <span>{details.data.status}</span>
+                {certification && (
+                  <span>
+                    {localRelease?.iso_3166_1} {certification}
+                  </span>
+                )}
                 <button
                   className="watch-trailer"
                   onClick={() => onTrailer(details.data)}
@@ -232,6 +250,7 @@ function DetailPage({
                 <h2>Visual world</h2>
                 <div>
                   {gallery.data.backdrops
+                    .slice()
                     .sort((a, b) => b.vote_average - a.vote_average)
                     .slice(0, 4)
                     .map((backdrop) => (
