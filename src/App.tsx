@@ -37,6 +37,13 @@ const genres: Record<number, string> = {
   878: "Sci-Fi",
   53: "Thriller",
 };
+const providerRegions: Record<string, string> = {
+  ID: "Indonesia",
+  US: "United States",
+  GB: "United Kingdom",
+  AU: "Australia",
+  CA: "Canada",
+};
 const year = (date: string) => date?.slice(0, 4) || "—";
 
 function Poster({
@@ -158,6 +165,7 @@ function DetailPage({
   onSelect: (movie: Movie) => void;
   onTrailer: (movie: Movie) => void;
 }) {
+  const [providerRegion, setProviderRegion] = useState("ID");
   const details = useQuery({
     queryKey: ["movie", movieId],
     queryFn: () => getMovieDetails(movieId),
@@ -171,7 +179,7 @@ function DetailPage({
     queryFn: () => getMovieCredits(movieId),
   });
   const watchProviders = useQuery({
-    queryKey: ["movie", movieId, "watch-providers", "ID"],
+    queryKey: ["movie", movieId, "watch-providers", providerRegion],
     queryFn: () => getWatchProviders(movieId),
   });
   const reviews = useQuery({
@@ -198,7 +206,7 @@ function DetailPage({
   const director = credits.data?.crew.find(
     (member) => member.job === "Director",
   );
-  const availability = watchProviders.data?.results.ID;
+  const availability = watchProviders.data?.results[providerRegion];
   const localRelease =
     releaseDates.data?.results.find(
       (release) => release.iso_3166_1 === "ID",
@@ -325,11 +333,16 @@ function DetailPage({
             {availability ? (
               <section
                 className="watch-providers"
-                aria-label="Where to watch in Indonesia"
+                aria-label={`Where to watch in ${providerRegions[providerRegion]}`}
               >
                 <div>
                   <h2>Where to watch</h2>
-                  <p>Available in Indonesia</p>
+                  <label>
+                    Region
+                    <select value={providerRegion} onChange={(event) => setProviderRegion(event.target.value)}>
+                      {Object.entries(providerRegions).map(([code, name]) => <option key={code} value={code}>{name}</option>)}
+                    </select>
+                  </label>
                 </div>
                 <div className="provider-groups">
                   {(
@@ -370,7 +383,7 @@ function DetailPage({
             ) : (
               <DetailNotice
                 title="Where to watch"
-                message={watchProviders.isError ? "Streaming availability could not be loaded right now." : "No streaming, rental, or purchase providers are listed for Indonesia."}
+                message={watchProviders.isError ? "Streaming availability could not be loaded right now." : `No streaming, rental, or purchase providers are listed for ${providerRegions[providerRegion]}.`}
               />
             )}
             {credits.data?.cast.length ? (

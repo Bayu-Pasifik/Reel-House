@@ -983,6 +983,7 @@ footer small {
   color: #a9a397;
   font-size: 12px;
 }
+.watch-providers label { display: grid; gap: 7px; color: #a9a397; font: 10px 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .1em; }.watch-providers select { width: min(210px, 100%); border: 1px solid rgba(255,255,255,.14); border-radius: 8px; background: #16171d; color: #e4ded2; padding: 9px 10px; font: 12px Manrope, sans-serif; }
 .provider-groups {
   display: grid;
   gap: 20px;
