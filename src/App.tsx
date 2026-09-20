@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { gsap } from 'gsap'
-import { discoverByGenre, getCollection, getMovieCredits, getMovieDetails, getMovieImages, getMovieReviews, getMovieVideos, getNowPlaying, getPopular, getRecommendations, getTopRated, getTrending, getUpcoming, getWatchProviders, image, searchMovies, type Movie } from './tmdb'
+import { discoverByGenre, getCollection, getLatest, getMovieCredits, getMovieDetails, getMovieImages, getMovieReviews, getMovieVideos, getNowPlaying, getPopular, getRecommendations, getTopRated, getTrending, getUpcoming, getWatchProviders, image, searchMovies, type Movie } from './tmdb'
 
 const genres: Record<number, string> = { 28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy', 80: 'Crime', 18: 'Drama', 27: 'Horror', 878: 'Sci-Fi', 53: 'Thriller' }
 const year = (date: string) => date?.slice(0, 4) || '—'
@@ -54,10 +54,11 @@ export default function App() {
   const upcoming = useQuery({ queryKey: ['movies', 'upcoming'], queryFn: getUpcoming })
   const topRated = useQuery({ queryKey: ['movies', 'top-rated'], queryFn: getTopRated })
   const nowPlaying = useQuery({ queryKey: ['movies', 'now-playing'], queryFn: getNowPlaying })
+  const latest = useQuery({ queryKey: ['movie', 'latest'], queryFn: getLatest })
   const results = useQuery({ queryKey: ['movies', 'search', submitted], queryFn: () => searchMovies(submitted), enabled: submitted.length > 1 })
   const genreResults = useQuery({ queryKey: ['movies', 'discover', activeGenre], queryFn: () => discoverByGenre(activeGenre!), enabled: activeGenre !== null })
   const videos = useQuery({ queryKey: ['movie', trailerMovie?.id, 'videos'], queryFn: () => getMovieVideos(trailerMovie!.id), enabled: Boolean(trailerMovie) })
-  const featured = trending.data?.results[0]
+  const featured = latest.data?.backdrop_path ? latest.data : trending.data?.results[0]
   const trailer = videos.data?.results.find(video => video.site === 'YouTube' && video.type === 'Trailer' && video.official) ?? videos.data?.results.find(video => video.site === 'YouTube' && video.type === 'Trailer')
 
   useEffect(() => {
